@@ -1,29 +1,74 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <title>AL HASSAN SALAM GEO</title>
 
 <style>
+
 body{
 font-family:Arial;
+margin:0;
 background:#f2f2f2;
-text-align:center;
 }
 
 header{
 background:green;
 color:white;
-padding:25px;
-font-size:30px;
+padding:20px;
+text-align:center;
+font-size:28px;
+}
+
+nav{
+background:#0c6b0c;
+padding:10px;
+text-align:center;
+}
+
+nav button{
+margin:5px;
+padding:10px 20px;
+border:none;
+background:white;
+cursor:pointer;
+}
+
+.section{
+display:none;
+padding:20px;
 }
 
 .card{
 background:white;
-width:300px;
-margin:20px auto;
 padding:20px;
+margin:10px;
 border-radius:10px;
 box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+input{
+padding:8px;
+margin:5px;
+}
+
+button.add{
+background:green;
+color:white;
+padding:8px 15px;
+border:none;
+}
+
+table{
+width:100%;
+background:white;
+margin-top:20px;
+border-collapse:collapse;
+}
+
+td,th{
+padding:10px;
+border:1px solid #ccc;
 }
 
 </style>
@@ -35,21 +80,167 @@ box-shadow:0 0 10px rgba(0,0,0,0.2);
 AL HASSAN SALAM GEO
 </header>
 
+<nav>
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('clients')">Clients</button>
+<button onclick="show('gps')">Balises GPS</button>
+<button onclick="show('finance')">Finances</button>
+</nav>
+
+<div id="dashboard" class="section">
+
 <div class="card">
-<h3>GPS installés</h3>
-<p>250</p>
+<h3>Clients</h3>
+<p id="totalClients">0</p>
 </div>
 
 <div class="card">
-<h3>GPS en stock</h3>
-<p>50</p>
+<h3>Balises GPS</h3>
+<p id="totalGPS">0</p>
 </div>
 
 <div class="card">
 <h3>Profit total</h3>
-<p>4 250 000 FCFA</p>
+<p id="profit">0 FCFA</p>
 </div>
+
+</div>
+
+<div id="clients" class="section">
+
+<h2>Ajouter client</h2>
+
+<input id="clientName" placeholder="Nom">
+<input id="clientPhone" placeholder="Téléphone">
+
+<button class="add" onclick="addClient()">Ajouter</button>
+
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Téléphone</th>
+</tr>
+</thead>
+<tbody id="clientTable"></tbody>
+</table>
+
+</div>
+
+<div id="gps" class="section">
+
+<h2>Ajouter GPS</h2>
+
+<input id="imei" placeholder="IMEI">
+<input id="achat" placeholder="Prix achat">
+<input id="vente" placeholder="Prix vente">
+
+<button class="add" onclick="addGPS()">Ajouter</button>
+
+<table>
+<thead>
+<tr>
+<th>IMEI</th>
+<th>Achat</th>
+<th>Vente</th>
+</tr>
+</thead>
+<tbody id="gpsTable"></tbody>
+</table>
+
+</div>
+
+<div id="finance" class="section">
+
+<h2>Finances</h2>
+
+<p>Total achat : <span id="totalAchat">0</span></p>
+<p>Total vente : <span id="totalVente">0</span></p>
+
+</div>
+
+<script>
+
+let clients = JSON.parse(localStorage.getItem("clients") || "[]");
+let gps = JSON.parse(localStorage.getItem("gps") || "[]");
+
+function save(){
+localStorage.setItem("clients",JSON.stringify(clients));
+localStorage.setItem("gps",JSON.stringify(gps));
+render();
+}
+
+function addClient(){
+
+let name=document.getElementById("clientName").value;
+let phone=document.getElementById("clientPhone").value;
+
+clients.push({name,phone});
+
+save();
+}
+
+function addGPS(){
+
+let imei=document.getElementById("imei").value;
+let achat=parseInt(document.getElementById("achat").value);
+let vente=parseInt(document.getElementById("vente").value);
+
+gps.push({imei,achat,vente});
+
+save();
+}
+
+function render(){
+
+document.getElementById("totalClients").innerText=clients.length;
+document.getElementById("totalGPS").innerText=gps.length;
+
+let profit=0;
+let achatTotal=0;
+let venteTotal=0;
+
+let clientHTML="";
+clients.forEach(c=>{
+clientHTML+=`<tr><td>${c.name}</td><td>${c.phone}</td></tr>`;
+});
+
+document.getElementById("clientTable").innerHTML=clientHTML;
+
+let gpsHTML="";
+
+gps.forEach(g=>{
+
+profit+=g.vente-g.achat;
+achatTotal+=g.achat;
+venteTotal+=g.vente;
+
+gpsHTML+=`<tr>
+<td>${g.imei}</td>
+<td>${g.achat}</td>
+<td>${g.vente}</td>
+</tr>`;
+});
+
+document.getElementById("gpsTable").innerHTML=gpsHTML;
+
+document.getElementById("profit").innerText=profit+" FCFA";
+document.getElementById("totalAchat").innerText=achatTotal;
+document.getElementById("totalVente").innerText=venteTotal;
+
+}
+
+function show(id){
+
+document.querySelectorAll(".section").forEach(s=>s.style.display="none");
+document.getElementById(id).style.display="block";
+
+}
+
+show("dashboard");
+render();
+
+</script>
 
 </body>
 </html>
-<!-- update -->
