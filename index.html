@@ -497,13 +497,13 @@ function toast(msg,err=false){
 
 // ============ DASHBOARD ============
 async function loadDashboard(){
-  const safe=p=>p.catch(()=>({data:[],error:null}));
+  const safeQ=async(q)=>{try{const r=await q;return r;}catch(e){return{data:[],error:e};}};
   const [b,cl,vh,ins,fin]=await Promise.all([
-    safe(db.from('balises').select('statut')),
-    safe(db.from('clients').select('id')),
-    safe(db.from('vehicules').select('id')),
-    safe(db.from('installations').select('*,balises(imei),vehicules(immatriculation,marque),clients(prenom,nom)').order('date_installation',{ascending:false}).limit(5)),
-    safe(db.from('finances').select('montant,sens,type'))
+    safeQ(db.from('balises').select('statut')),
+    safeQ(db.from('clients').select('id')),
+    safeQ(db.from('vehicules').select('id')),
+    safeQ(db.from('installations').select('*,balises(imei),vehicules(immatriculation,marque),clients(prenom,nom)').order('date_installation',{ascending:false}).limit(5)),
+    safeQ(db.from('finances').select('montant,sens,type'))
   ]);
   const total=(b.data||[]).length,inst=(b.data||[]).filter(x=>x.statut==='installée').length;
   document.getElementById('s-inst').textContent=inst;
@@ -657,7 +657,7 @@ async function loadFinances(){
   if(type)q=q.eq('type',type);if(sens)q=q.eq('sens',sens);
   const {data,error}=await q;
 
-  const {data:all}=await db.from('finances').select('montant,sens,type').then(r=>r).catch(()=>({data:[],error:null}));
+  let allRes;try{allRes=await db.from('finances').select('montant,sens,type');}catch(e){allRes={data:[]};}const all=allRes?.data||allRes?.data===null?allRes.data:[];
   const fins=all||[];
   const rec=fins.filter(f=>f.sens==='recette').reduce((a,f)=>a+Number(f.montant),0);
   const dep=fins.filter(f=>f.sens==='depense').reduce((a,f)=>a+Number(f.montant),0);
