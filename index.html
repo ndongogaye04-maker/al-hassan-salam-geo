@@ -1,246 +1,740 @@
+bash
+
+cat /home/claude/ahsg_project/index.html
+Sortie
+
 <!DOCTYPE html>
-<html>
-
+<html lang="fr">
 <head>
-<title>AL HASSAN SALAM GEO</title>
-
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AL HASSAN SALAM GEO — Gestion GPS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#111;font-size:14px}
 
-body{
-font-family:Arial;
-margin:0;
-background:#f2f2f2;
-}
+/* ===== LOGIN ===== */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-card{background:white;border-radius:16px;padding:40px;width:400px;max-width:95vw;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo img{height:52px;width:auto}
+.login-logo p{font-size:12px;color:#888;margin-top:6px}
+.tab-row{display:flex;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;margin-bottom:24px}
+.tab-btn{flex:1;padding:10px;font-size:13px;background:none;border:none;cursor:pointer;color:#888;font-family:inherit}
+.tab-btn.on{background:#059669;color:white;font-weight:500}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:500;color:#444;margin-bottom:5px}
+.field input{width:100%;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;outline:none;font-family:inherit;transition:.15s}
+.field input:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,.1)}
+.field select{width:100%;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;outline:none;font-family:inherit}
+.login-btn{width:100%;padding:11px;background:#059669;color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:4px}
+.login-btn:hover{background:#047857}
+.login-btn:disabled{opacity:.6;cursor:not-allowed}
+.err-box{background:#fee2e2;color:#991b1b;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+.err-box.on{display:block}
+.forgot{text-align:right;margin-bottom:16px}
+.forgot a{font-size:12px;color:#059669;text-decoration:none}
 
-header{
-background:green;
-color:white;
-padding:20px;
-text-align:center;
-font-size:28px;
-}
-
-nav{
-background:#0c6b0c;
-padding:10px;
-text-align:center;
-}
-
-nav button{
-margin:5px;
-padding:10px 20px;
-border:none;
-background:white;
-cursor:pointer;
-}
-
-.section{
-display:none;
-padding:20px;
-}
-
-.card{
-background:white;
-padding:20px;
-margin:10px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
-}
-
-input{
-padding:8px;
-margin:5px;
-}
-
-button.add{
-background:green;
-color:white;
-padding:8px 15px;
-border:none;
-}
-
-table{
-width:100%;
-background:white;
-margin-top:20px;
-border-collapse:collapse;
-}
-
-td,th{
-padding:10px;
-border:1px solid #ccc;
-}
-
+/* ===== APP ===== */
+.app-wrap{display:flex;height:100vh;overflow:hidden}
+aside{width:220px;min-width:220px;background:white;border-right:1px solid #e8e8e8;display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-logo{padding:16px;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:center}
+.sidebar-logo img{height:36px;width:auto}
+nav{flex:1;padding:10px 8px}
+.nav-sec{font-size:10px;font-weight:600;color:#bbb;letter-spacing:.06em;text-transform:uppercase;padding:12px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;color:#666;font-size:13px;transition:.12s;margin-bottom:1px}
+.nav-item:hover{background:#f8f9fa;color:#111}
+.nav-item.on{background:#d1fae5;color:#059669;font-weight:500}
+.nav-item svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;flex-shrink:0}
+.nav-badge{margin-left:auto;background:#059669;color:white;font-size:10px;padding:1px 6px;border-radius:10px}
+.sidebar-foot{padding:12px;border-top:1px solid #e8e8e8}
+.user-row{display:flex;align-items:center;gap:8px}
+.uavatar{width:30px;height:30px;border-radius:50%;background:#059669;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:600;flex-shrink:0}
+.uname{font-size:12px;font-weight:500}
+.urole{font-size:11px;color:#888}
+.logout-btn{margin-left:auto;background:none;border:none;cursor:pointer;color:#888;padding:4px}
+.logout-btn:hover{color:#dc2626}
+.logout-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{background:white;border-bottom:1px solid #e8e8e8;padding:0 24px;height:54px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.topbar h1{font-size:15px;font-weight:600;flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid #e8e8e8;background:white;cursor:pointer;font-size:13px;color:#111;transition:.12s;white-space:nowrap;font-family:inherit}
+.btn:hover{background:#f8f9fa}
+.btn-g{background:#059669;color:white;border-color:#059669}
+.btn-g:hover{background:#047857}
+.btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2}
+.content{padding:20px 24px;flex:1}
+.page{display:none}.page.on{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.scard{background:white;border:1px solid #e8e8e8;border-radius:12px;padding:16px}
+.sicon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.s1{background:#d1fae5}.s2{background:#dcfce7}.s3{background:#fef3c7}.s4{background:#ede9fe}
+.s1 svg{stroke:#059669}.s2 svg{stroke:#15803d}.s3 svg{stroke:#92400e}.s4 svg{stroke:#6d28d9}
+.sicon svg{width:18px;height:18px;fill:none;stroke-width:1.8}
+.slabel{font-size:12px;color:#666;margin-bottom:2px}
+.sval{font-size:26px;font-weight:600}
+.fin-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.fcard{border-radius:12px;padding:18px;border:1px solid}
+.fcard.rec{background:#dcfce7;border-color:#bbf7d0}
+.fcard.dep{background:#fee2e2;border-color:#fecaca}
+.fcard.ben{background:#dbeafe;border-color:#bfdbfe}
+.flabel{font-size:12px;font-weight:600;margin-bottom:6px}
+.fcard.rec .flabel{color:#166534}
+.fcard.dep .flabel{color:#991b1b}
+.fcard.ben .flabel{color:#1e40af}
+.famount{font-size:20px;font-weight:700}
+.fcard.rec .famount{color:#15803d}
+.fcard.dep .famount{color:#dc2626}
+.fcard.ben .famount{color:#1d4ed8}
+.fsub{font-size:11px;opacity:.65;margin-top:3px}
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
+.card{background:white;border:1px solid #e8e8e8;border-radius:12px;padding:16px}
+.card-title{font-size:13px;font-weight:500;color:#666;margin-bottom:14px}
+.bar-chart{display:flex;align-items:flex-end;gap:5px;height:100px}
+.bwrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar{width:100%;border-radius:3px 3px 0 0;background:#059669;min-height:4px}
+.blabel{font-size:9px;color:#888}
+.donut-wrap{display:flex;align-items:center;gap:16px}
+.legend{display:flex;flex-direction:column;gap:8px}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:12px}
+.ldot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:#666;background:#f8f9fa;border-bottom:1px solid #e8e8e8}
+td{padding:9px 14px;border-bottom:1px solid #e8e8e8;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#f9fffe}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.bg{background:#dcfce7;color:#166534}
+.ba{background:#fef3c7;color:#92400e}
+.br{background:#fee2e2;color:#991b1b}
+.bb{background:#dbeafe;color:#1e40af}
+.bx{background:#f8f9fa;color:#666;border:1px solid #e8e8e8}
+.row-acts{display:flex;gap:4px}
+.ibtn{width:28px;height:28px;border-radius:8px;border:1px solid #e8e8e8;display:flex;align-items:center;justify-content:center;cursor:pointer;background:white}
+.ibtn:hover{background:#f8f9fa}
+.ibtn svg{width:12px;height:12px;fill:none;stroke:#666;stroke-width:2}
+.ibtn.del:hover{border-color:#fca5a5;background:#fee2e2}
+.ibtn.del:hover svg{stroke:#dc2626}
+.phdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.phdr h2{font-size:17px;font-weight:600}
+.filt{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filt select,.filt input{padding:7px 10px;border-radius:8px;border:1px solid #e8e8e8;background:white;font-size:13px;color:#111;outline:none;font-family:inherit}
+.ctable{background:white;border:1px solid #e8e8e8;border-radius:12px;overflow:hidden}
+.modal-bg{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.3);align-items:center;justify-content:center}
+.modal-bg.on{display:flex}
+.modal{background:white;border-radius:12px;border:1px solid #e8e8e8;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:22px}
+.mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.mhdr h3{font-size:15px;font-weight:600}
+.mclose{width:28px;height:28px;border-radius:8px;border:1px solid #e8e8e8;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.mclose:hover{background:#f8f9fa}
+.mclose svg{width:13px;height:13px;fill:none;stroke:#666;stroke-width:2}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ff{display:flex;flex-direction:column;gap:4px}
+.ff.full{grid-column:span 2}
+.ff label{font-size:12px;font-weight:500;color:#444}
+.ff input,.ff select,.ff textarea{padding:8px 10px;border-radius:8px;border:1px solid #e8e8e8;background:#f8f9fa;font-size:13px;color:#111;outline:none;font-family:inherit;transition:.12s}
+.ff input:focus,.ff select:focus{border-color:#059669;background:white}
+.ff textarea{height:60px;resize:vertical}
+.mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid #e8e8e8}
+.toast{position:fixed;bottom:24px;right:24px;z-index:2000;background:#18181b;color:white;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.empty{text-align:center;padding:40px;color:#888}
+.loading{text-align:center;padding:40px;color:#888}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid #e8e8e8;border-top-color:#059669;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.ccat{background:white;border:1px solid #e8e8e8;border-radius:8px;padding:12px}
+.ccat-l{font-size:11px;color:#666;margin-bottom:4px}
+.ccat-v{font-size:15px;font-weight:600}
+.mrec{color:#059669;font-weight:500}
+.mdep{color:#dc2626;font-weight:500}
+.tbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.ta{background:#fef3c7;color:#92400e}
+.tv{background:#dcfce7;color:#166534}
+.tt{background:#e0e7ff;color:#3730a3}
+.tth{background:#fce7f3;color:#9d174d}
+.tp{background:#ccfbf1;color:#0f766e}
+.to{background:#f3f4f6;color:#374151}
 </style>
 </head>
-
 <body>
 
-<header>
-AL HASSAN SALAM GEO
-</header>
-
-<nav>
-<button onclick="show('dashboard')">Dashboard</button>
-<button onclick="show('clients')">Clients</button>
-<button onclick="show('gps')">Balises GPS</button>
-<button onclick="show('finance')">Finances</button>
-</nav>
-
-<div id="dashboard" class="section">
-
-<div class="card">
-<h3>Clients</h3>
-<p id="totalClients">0</p>
+<!-- ===== LOGIN ===== -->
+<div id="login-wrap" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="data:image/png;base64,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" alt="AHSG"/>
+      <p>Gestion GPS</p>
+    </div>
+    <div class="tab-row">
+      <button class="tab-btn on" onclick="switchTab('login',this)">Connexion</button>
+      <button class="tab-btn" onclick="switchTab('register',this)">Créer un compte</button>
+    </div>
+    <div id="login-form">
+      <div class="err-box" id="login-err"></div>
+      <div class="field"><label>Email</label><input type="email" id="li-email" placeholder="admin@exemple.com"/></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="li-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="forgot"><a href="#">Mot de passe oublié ?</a></div>
+      <button class="login-btn" id="li-btn" onclick="doLogin()">Se connecter</button>
+    </div>
+    <div id="register-form" style="display:none">
+      <div class="err-box" id="reg-err"></div>
+      <div class="field"><label>Nom complet</label><input type="text" id="reg-nom" placeholder="Prénom Nom"/></div>
+      <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="email@exemple.com"/></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="reg-pwd" placeholder="Minimum 6 caractères"/></div>
+      <div class="field"><label>Rôle</label><select id="reg-role"><option value="agent">Agent</option><option value="technicien">Technicien</option><option value="partenaire">Partenaire</option><option value="admin">Administrateur</option></select></div>
+      <button class="login-btn" id="reg-btn" onclick="doRegister()">Créer le compte</button>
+    </div>
+  </div>
 </div>
 
-<div class="card">
-<h3>Balises GPS</h3>
-<p id="totalGPS">0</p>
+<!-- ===== APP ===== -->
+<div id="app-wrap" class="app-wrap" style="display:none">
+  <aside>
+    <div class="sidebar-logo"><img src="data:image/png;base64,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" alt="AHSG" style="height:34px"/></div>
+    <nav>
+      <div class="nav-sec">Principal</div>
+      <div class="nav-item on" data-page="dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Tableau de bord</div>
+      <div class="nav-sec">Gestion</div>
+      <div class="nav-item" data-page="balises"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Balises GPS<span class="nav-badge" id="nb-b">0</span></div>
+      <div class="nav-item" data-page="clients"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clients<span class="nav-badge" id="nb-c">0</span></div>
+      <div class="nav-item" data-page="vehicules"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Véhicules<span class="nav-badge" id="nb-v">0</span></div>
+      <div class="nav-item" data-page="installations"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Installations</div>
+      <div class="nav-item" data-page="finances"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Finances</div>
+      <div class="nav-sec">Système</div>
+      <div class="nav-item" data-page="parametres"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Paramètres</div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-row">
+        <div class="uavatar" id="uav">--</div>
+        <div><div class="uname" id="uname">...</div><div class="urole" id="urole">—</div></div>
+        <button class="logout-btn" onclick="doLogout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="topbar">
+      <h1 id="ptitle">Tableau de bord</h1>
+      <button class="btn" onclick="doExport()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exporter CSV</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="content page on" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="scard"><div class="sicon s1"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div><div class="slabel">Balises installées</div><div class="sval" id="s-inst">—</div></div>
+        <div class="scard"><div class="sicon s2"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l8.84 8.84 8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></div><div class="slabel">Total balises</div><div class="sval" id="s-tot">—</div></div>
+        <div class="scard"><div class="sicon s3"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="slabel">Clients</div><div class="sval" id="s-cl">—</div></div>
+        <div class="scard"><div class="sicon s4"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div class="slabel">Véhicules</div><div class="sval" id="s-vh">—</div></div>
+      </div>
+      <div class="fin-row">
+        <div class="fcard rec"><div class="flabel">💰 Recettes</div><div class="famount" id="d-rec">0 F</div><div class="fsub">Ventes balises</div></div>
+        <div class="fcard dep"><div class="flabel">📦 Dépenses</div><div class="famount" id="d-dep">0 F</div><div class="fsub">Achats + frais</div></div>
+        <div class="fcard ben"><div class="flabel">📈 Bénéfice net</div><div class="famount" id="d-ben">0 F</div><div class="fsub">Recettes − Dépenses</div></div>
+      </div>
+      <div class="charts-row">
+        <div class="card"><div class="card-title">Installations par mois</div><div class="bar-chart" id="bar-chart"></div></div>
+        <div class="card"><div class="card-title">Statut balises</div><div class="donut-wrap"><svg width="90" height="90" viewBox="0 0 90 90" id="donut-svg"><circle cx="45" cy="45" r="35" fill="none" stroke="#e8e8e8" stroke-width="14"/></svg><div class="legend" id="donut-leg"></div></div></div>
+      </div>
+      <div class="ctable"><div style="padding:12px 16px;border-bottom:1px solid #e8e8e8;font-size:13px;font-weight:500">Dernières installations</div><div id="recent-inst"><div class="loading"><span class="spin"></span>Chargement...</div></div></div>
+    </div>
+
+    <!-- BALISES -->
+    <div class="content page" id="page-balises">
+      <div class="phdr"><h2>Balises GPS</h2><button class="btn btn-g" onclick="openM('m-balise')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button></div>
+      <div class="filt"><input type="text" id="fb-imei" placeholder="Filtrer IMEI..." style="width:200px"/><select id="fb-stat"><option value="">Tous statuts</option><option value="installée">Installée</option><option value="en_stock">En stock</option><option value="désactivée">Désactivée</option></select><button class="btn" onclick="loadBalises()">Actualiser</button></div>
+      <div class="ctable"><div id="balises-c"><div class="loading"><span class="spin"></span>Chargement...</div></div></div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="content page" id="page-clients">
+      <div class="phdr"><h2>Clients</h2><button class="btn btn-g" onclick="openM('m-client')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button></div>
+      <div class="filt"><input type="text" id="fc-s" placeholder="Nom, téléphone..." style="width:220px"/><select id="fc-t"><option value="">Tous types</option><option value="particulier">Particulier</option><option value="entreprise">Entreprise</option></select><button class="btn" onclick="loadClients()">Actualiser</button></div>
+      <div class="ctable"><div id="clients-c"><div class="loading"><span class="spin"></span>Chargement...</div></div></div>
+    </div>
+
+    <!-- VEHICULES -->
+    <div class="content page" id="page-vehicules">
+      <div class="phdr"><h2>Véhicules</h2><button class="btn btn-g" onclick="openM('m-veh')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button></div>
+      <div class="filt"><input type="text" id="fv-s" placeholder="Immatriculation..." style="width:220px"/><button class="btn" onclick="loadVehicules()">Actualiser</button></div>
+      <div class="ctable"><div id="vehicules-c"><div class="loading"><span class="spin"></span>Chargement...</div></div></div>
+    </div>
+
+    <!-- INSTALLATIONS -->
+    <div class="content page" id="page-installations">
+      <div class="phdr"><h2>Installations</h2><button class="btn btn-g" onclick="openM('m-inst')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nouvelle</button></div>
+      <div class="ctable"><div id="inst-c"><div class="loading"><span class="spin"></span>Chargement...</div></div></div>
+    </div>
+
+    <!-- FINANCES -->
+    <div class="content page" id="page-finances">
+      <div class="phdr"><h2>Finances</h2><button class="btn btn-g" onclick="openM('m-fin')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button></div>
+      <div class="fin-row">
+        <div class="fcard rec"><div class="flabel">💰 Recettes</div><div class="famount" id="f-rec">0 F</div><div class="fsub">Ventes balises</div></div>
+        <div class="fcard dep"><div class="flabel">📦 Dépenses</div><div class="famount" id="f-dep">0 F</div><div class="fsub">Achats + frais</div></div>
+        <div class="fcard ben"><div class="flabel">📈 Bénéfice net</div><div class="famount" id="f-ben">0 F</div><div class="fsub">Recettes − Dépenses</div></div>
+      </div>
+      <div class="cats-grid" id="fin-cats"></div>
+      <div class="filt"><select id="ff-t"><option value="">Tous types</option><option value="achat_balise">Achat balise</option><option value="vente_balise">Vente balise</option><option value="transport">Transport</option><option value="technicien">Technicien</option><option value="puce_sim">Puce SIM</option><option value="autre">Autre</option></select><select id="ff-s"><option value="">Tout</option><option value="recette">Recettes</option><option value="depense">Dépenses</option></select><button class="btn" onclick="loadFinances()">Actualiser</button></div>
+      <div class="ctable"><div id="fin-c"><div class="loading"><span class="spin"></span>Chargement...</div></div></div>
+    </div>
+
+    <!-- PARAMETRES -->
+    <div class="content page" id="page-parametres">
+      <div class="phdr"><h2>Paramètres</h2></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card"><div class="card-title">Utilisateurs</div><div id="users-c"><div class="loading"><span class="spin"></span>Chargement...</div></div><button class="btn btn-g" style="margin-top:12px;width:100%" onclick="openM('m-user')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter utilisateur</button></div>
+        <div class="card"><div class="card-title">Informations société</div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+            <div class="ff"><label>Nom société</label><input type="text" value="AL HASSAN SALAM GEO"/></div>
+            <div class="ff"><label>Email</label><input type="text" value="contact@ahsg.sn"/></div>
+            <div class="ff"><label>Téléphone</label><input type="text" value="+221 77 000 00 00"/></div>
+          </div>
+          <button class="btn btn-g" style="margin-top:14px" onclick="toast('Sauvegardé !')">Sauvegarder</button>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 
-<div class="card">
-<h3>Profit total</h3>
-<p id="profit">0 FCFA</p>
-</div>
+<!-- MODALS -->
+<div class="modal-bg" id="m-balise"><div class="modal">
+  <div class="mhdr"><h3 id="mb-title">Ajouter une balise</h3><div class="mclose" onclick="closeM('m-balise')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+  <input type="hidden" id="mb-id"/>
+  <div class="fgrid">
+    <div class="ff full"><label>IMEI *</label><input type="text" id="mb-imei"/></div>
+    <div class="ff"><label>Modèle</label><input type="text" id="mb-mod"/></div>
+    <div class="ff"><label>Date achat</label><input type="date" id="mb-date"/></div>
+    <div class="ff"><label>Statut</label><select id="mb-stat"><option value="en_stock">En stock</option><option value="installée">Installée</option><option value="désactivée">Désactivée</option></select></div>
+    <div class="ff"><label>SIM</label><select id="mb-sim"><option value="false">Non</option><option value="true">Oui</option></select></div>
+    <div class="ff"><label>Opérateur</label><select id="mb-op"><option value="">—</option><option>Orange</option><option>Free</option><option>Expresso</option><option>Autre</option></select></div>
+    <div class="ff"><label>💰 Prix achat (F CFA)</label><input type="number" id="mb-pa" placeholder="0" min="0"/></div>
+    <div class="ff"><label>🏷️ Prix vente (F CFA)</label><input type="number" id="mb-pv" placeholder="0" min="0"/></div>
+    <div class="ff full"><label>📱 Prix puce SIM (F CFA)</label><input type="number" id="mb-pp" placeholder="0" min="0"/></div>
+    <div class="ff full"><label>Remarque</label><textarea id="mb-rem"></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn" onclick="closeM('m-balise')">Annuler</button><button class="btn btn-g" onclick="saveBalise()">Enregistrer</button></div>
+</div></div>
 
-</div>
+<div class="modal-bg" id="m-client"><div class="modal">
+  <div class="mhdr"><h3 id="mc-title">Ajouter un client</h3><div class="mclose" onclick="closeM('m-client')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+  <input type="hidden" id="mc-id"/>
+  <div class="fgrid">
+    <div class="ff"><label>Prénom *</label><input type="text" id="mc-prenom"/></div>
+    <div class="ff"><label>Nom *</label><input type="text" id="mc-nom"/></div>
+    <div class="ff"><label>Téléphone</label><input type="text" id="mc-tel"/></div>
+    <div class="ff"><label>Email</label><input type="email" id="mc-email"/></div>
+    <div class="ff full"><label>Adresse</label><input type="text" id="mc-addr"/></div>
+    <div class="ff"><label>Type</label><select id="mc-type"><option value="particulier">Particulier</option><option value="entreprise">Entreprise</option></select></div>
+  </div>
+  <div class="mfoot"><button class="btn" onclick="closeM('m-client')">Annuler</button><button class="btn btn-g" onclick="saveClient()">Enregistrer</button></div>
+</div></div>
 
-<div id="clients" class="section">
+<div class="modal-bg" id="m-veh"><div class="modal">
+  <div class="mhdr"><h3 id="mv-title">Ajouter un véhicule</h3><div class="mclose" onclick="closeM('m-veh')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+  <input type="hidden" id="mv-id"/>
+  <div class="fgrid">
+    <div class="ff"><label>Marque *</label><input type="text" id="mv-marque"/></div>
+    <div class="ff"><label>Modèle *</label><input type="text" id="mv-modele"/></div>
+    <div class="ff"><label>Immatriculation *</label><input type="text" id="mv-immat"/></div>
+    <div class="ff"><label>Couleur</label><input type="text" id="mv-couleur"/></div>
+    <div class="ff full"><label>Propriétaire</label><select id="mv-client"><option value="">-- Sélectionner --</option></select></div>
+  </div>
+  <div class="mfoot"><button class="btn" onclick="closeM('m-veh')">Annuler</button><button class="btn btn-g" onclick="saveVeh()">Enregistrer</button></div>
+</div></div>
 
-<h2>Ajouter client</h2>
+<div class="modal-bg" id="m-inst"><div class="modal">
+  <div class="mhdr"><h3>Nouvelle installation</h3><div class="mclose" onclick="closeM('m-inst')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+  <div class="fgrid">
+    <div class="ff full"><label>Balise GPS *</label><select id="mi-bal"><option value="">-- Sélectionner --</option></select></div>
+    <div class="ff full"><label>Véhicule *</label><select id="mi-veh"><option value="">-- Sélectionner --</option></select></div>
+    <div class="ff full"><label>Client</label><select id="mi-cl"><option value="">-- Sélectionner --</option></select></div>
+    <div class="ff"><label>Date *</label><input type="date" id="mi-date"/></div>
+    <div class="ff"><label>Technicien</label><input type="text" id="mi-tech"/></div>
+    <div class="ff"><label>🚗 Frais transport (F CFA)</label><input type="number" id="mi-tr" placeholder="0" min="0"/></div>
+    <div class="ff"><label>🔧 Paiement technicien (F CFA)</label><input type="number" id="mi-tf" placeholder="0" min="0"/></div>
+    <div class="ff full"><label>Lieu</label><input type="text" id="mi-lieu"/></div>
+    <div class="ff full"><label>Photo (URL)</label><input type="text" id="mi-photo" placeholder="https://..."/></div>
+  </div>
+  <div class="mfoot"><button class="btn" onclick="closeM('m-inst')">Annuler</button><button class="btn btn-g" onclick="saveInst()">Enregistrer</button></div>
+</div></div>
 
-<input id="clientName" placeholder="Nom">
-<input id="clientPhone" placeholder="Téléphone">
+<div class="modal-bg" id="m-fin"><div class="modal">
+  <div class="mhdr"><h3>Ajouter une transaction</h3><div class="mclose" onclick="closeM('m-fin')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+  <input type="hidden" id="mf-id"/>
+  <div class="fgrid">
+    <div class="ff"><label>Type *</label><select id="mf-type" onchange="autoSens()"><option value="achat_balise">Achat balise</option><option value="vente_balise">Vente balise</option><option value="transport">Transport</option><option value="technicien">Technicien</option><option value="puce_sim">Puce SIM</option><option value="autre">Autre</option></select></div>
+    <div class="ff"><label>Sens</label><select id="mf-sens"><option value="depense">Dépense</option><option value="recette">Recette</option></select></div>
+    <div class="ff"><label>Montant (F CFA) *</label><input type="number" id="mf-montant" placeholder="0" min="0"/></div>
+    <div class="ff"><label>Date *</label><input type="date" id="mf-date"/></div>
+    <div class="ff full"><label>Description</label><input type="text" id="mf-desc" placeholder="Détails..."/></div>
+    <div class="ff"><label>Référence</label><input type="text" id="mf-ref"/></div>
+    <div class="ff"><label>Balise liée</label><select id="mf-bal"><option value="">— Optionnel —</option></select></div>
+    <div class="ff"><label>Client lié</label><select id="mf-cl"><option value="">— Optionnel —</option></select></div>
+  </div>
+  <div class="mfoot"><button class="btn" onclick="closeM('m-fin')">Annuler</button><button class="btn btn-g" onclick="saveFin()">Enregistrer</button></div>
+</div></div>
 
-<button class="add" onclick="addClient()">Ajouter</button>
+<div class="modal-bg" id="m-user"><div class="modal">
+  <div class="mhdr"><h3>Ajouter un utilisateur</h3><div class="mclose" onclick="closeM('m-user')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+  <div class="fgrid">
+    <div class="ff full"><label>Nom complet</label><input type="text" id="mu-nom"/></div>
+    <div class="ff"><label>Email *</label><input type="email" id="mu-email"/></div>
+    <div class="ff"><label>Mot de passe *</label><input type="password" id="mu-pwd"/></div>
+    <div class="ff"><label>Rôle</label><select id="mu-role"><option value="agent">Agent</option><option value="technicien">Technicien</option><option value="partenaire">Partenaire</option><option value="admin">Administrateur</option></select></div>
+  </div>
+  <div class="mfoot"><button class="btn" onclick="closeM('m-user')">Annuler</button><button class="btn btn-g" onclick="saveUser()">Créer</button></div>
+</div></div>
 
-<table>
-<thead>
-<tr>
-<th>Nom</th>
-<th>Téléphone</th>
-</tr>
-</thead>
-<tbody id="clientTable"></tbody>
-</table>
-
-</div>
-
-<div id="gps" class="section">
-
-<h2>Ajouter GPS</h2>
-
-<input id="imei" placeholder="IMEI">
-<input id="achat" placeholder="Prix achat">
-<input id="vente" placeholder="Prix vente">
-
-<button class="add" onclick="addGPS()">Ajouter</button>
-
-<table>
-<thead>
-<tr>
-<th>IMEI</th>
-<th>Achat</th>
-<th>Vente</th>
-</tr>
-</thead>
-<tbody id="gpsTable"></tbody>
-</table>
-
-</div>
-
-<div id="finance" class="section">
-
-<h2>Finances</h2>
-
-<p>Total achat : <span id="totalAchat">0</span></p>
-<p>Total vente : <span id="totalVente">0</span></p>
-
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
+// ============ SUPABASE INIT ============
+const SB_URL='https://brsuhtnyzagwvnczlnqt.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyc3VodG55emFnd3ZuY3psbnF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDM3MTEsImV4cCI6MjA4OTI3OTcxMX0.XUC97V1dBPld5859UPuuPEsPfoicpprFLvOo2hxtySc';
+const {createClient}=supabase;
+const db=createClient(SB_URL,SB_KEY);
+const fmt=n=>Number(n||0).toLocaleString('fr-FR')+' F CFA';
 
-let clients = JSON.parse(localStorage.getItem("clients") || "[]");
-let gps = JSON.parse(localStorage.getItem("gps") || "[]");
-
-function save(){
-localStorage.setItem("clients",JSON.stringify(clients));
-localStorage.setItem("gps",JSON.stringify(gps));
-render();
+// ============ AUTH ============
+function switchTab(tab,btn){
+  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
+  document.getElementById('register-form').style.display=tab==='register'?'block':'none';
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
 }
 
-function addClient(){
-
-let name=document.getElementById("clientName").value;
-let phone=document.getElementById("clientPhone").value;
-
-clients.push({name,phone});
-
-save();
+async function doLogin(){
+  const email=document.getElementById('li-email').value.trim();
+  const pwd=document.getElementById('li-pwd').value;
+  const btn=document.getElementById('li-btn');
+  const err=document.getElementById('login-err');
+  err.classList.remove('on');
+  if(!email||!pwd){err.textContent='Veuillez remplir tous les champs.';err.classList.add('on');return;}
+  btn.disabled=true;btn.textContent='Connexion...';
+  const {data,error}=await db.auth.signInWithPassword({email,password:pwd});
+  if(error){
+    err.textContent=error.message.includes('Invalid')?'Email ou mot de passe incorrect.':error.message;
+    err.classList.add('on');btn.disabled=false;btn.textContent='Se connecter';
+  } else {
+    await loadUserProfile(data.user);
+    showAppScreen();
+  }
 }
 
-function addGPS(){
-
-let imei=document.getElementById("imei").value;
-let achat=parseInt(document.getElementById("achat").value);
-let vente=parseInt(document.getElementById("vente").value);
-
-gps.push({imei,achat,vente});
-
-save();
+async function doRegister(){
+  const nom=document.getElementById('reg-nom').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pwd=document.getElementById('reg-pwd').value;
+  const role=document.getElementById('reg-role').value;
+  const btn=document.getElementById('reg-btn');
+  const err=document.getElementById('reg-err');
+  err.classList.remove('on');
+  if(!email||!pwd){err.textContent='Email et mot de passe obligatoires.';err.classList.add('on');return;}
+  btn.disabled=true;btn.textContent='Création...';
+  const {error}=await db.auth.signUp({email,password:pwd,options:{data:{nom,role}}});
+  if(error){err.textContent=error.message;err.classList.add('on');btn.disabled=false;btn.textContent='Créer le compte';}
+  else{alert('Compte créé ! Connectez-vous maintenant.');switchTab('login',document.querySelector('.tab-btn'));}
 }
 
-function render(){
+async function doLogout(){
+  await db.auth.signOut();
+  document.getElementById('app-wrap').style.display='none';
+  document.getElementById('login-wrap').style.display='flex';
+  document.getElementById('li-btn').disabled=false;
+  document.getElementById('li-btn').textContent='Se connecter';
+}
 
-document.getElementById("totalClients").innerText=clients.length;
-document.getElementById("totalGPS").innerText=gps.length;
+async function loadUserProfile(user){
+  const {data:p}=await db.from('profils').select('*').eq('id',user.id).single();
+  if(p){
+    document.getElementById('uav').textContent=(p.nom||p.email||'').substring(0,2).toUpperCase();
+    document.getElementById('uname').textContent=p.nom||p.email;
+    document.getElementById('urole').textContent=p.role||'agent';
+  }
+}
 
-let profit=0;
-let achatTotal=0;
-let venteTotal=0;
+function showAppScreen(){
+  document.getElementById('login-wrap').style.display='none';
+  document.getElementById('app-wrap').style.display='flex';
+  loadDashboard();
+}
 
-let clientHTML="";
-clients.forEach(c=>{
-clientHTML+=`<tr><td>${c.name}</td><td>${c.phone}</td></tr>`;
+// Check session on load
+db.auth.getSession().then(({data:{session}})=>{
+  if(session){loadUserProfile(session.user);showAppScreen();}
 });
 
-document.getElementById("clientTable").innerHTML=clientHTML;
-
-let gpsHTML="";
-
-gps.forEach(g=>{
-
-profit+=g.vente-g.achat;
-achatTotal+=g.achat;
-venteTotal+=g.vente;
-
-gpsHTML+=`<tr>
-<td>${g.imei}</td>
-<td>${g.achat}</td>
-<td>${g.vente}</td>
-</tr>`;
+// ============ NAVIGATION ============
+const ptitles={dashboard:'Tableau de bord',balises:'Balises GPS',clients:'Clients',vehicules:'Véhicules',installations:'Installations',finances:'Finances',parametres:'Paramètres'};
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    const p=item.dataset.page;
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('on'));
+    document.getElementById('page-'+p).classList.add('on');
+    item.classList.add('on');
+    document.getElementById('ptitle').textContent=ptitles[p]||p;
+    if(p==='balises')loadBalises();
+    if(p==='clients')loadClients();
+    if(p==='vehicules')loadVehicules();
+    if(p==='installations')loadInst();
+    if(p==='finances')loadFinances();
+    if(p==='parametres')loadUsers();
+  });
 });
 
-document.getElementById("gpsTable").innerHTML=gpsHTML;
+// ============ MODALS ============
+function openM(id){document.getElementById(id).classList.add('on');}
+function closeM(id){document.getElementById(id).classList.remove('on');}
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('on');}));
 
-document.getElementById("profit").innerText=profit+" FCFA";
-document.getElementById("totalAchat").innerText=achatTotal;
-document.getElementById("totalVente").innerText=venteTotal;
-
+function toast(msg,err=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.background=err?'#991b1b':'#18181b';
+  t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000);
 }
 
-function show(id){
+// ============ DASHBOARD ============
+async function loadDashboard(){
+  const safe=p=>p.catch(()=>({data:[],error:null}));
+  const [b,cl,vh,ins,fin]=await Promise.all([
+    safe(db.from('balises').select('statut')),
+    safe(db.from('clients').select('id')),
+    safe(db.from('vehicules').select('id')),
+    safe(db.from('installations').select('*,balises(imei),vehicules(immatriculation,marque),clients(prenom,nom)').order('date_installation',{ascending:false}).limit(5)),
+    safe(db.from('finances').select('montant,sens,type'))
+  ]);
+  const total=(b.data||[]).length,inst=(b.data||[]).filter(x=>x.statut==='installée').length;
+  document.getElementById('s-inst').textContent=inst;
+  document.getElementById('s-tot').textContent=total;
+  document.getElementById('s-cl').textContent=(cl.data||[]).length;
+  document.getElementById('s-vh').textContent=(vh.data||[]).length;
+  document.getElementById('nb-b').textContent=total;
+  document.getElementById('nb-c').textContent=(cl.data||[]).length;
+  document.getElementById('nb-v').textContent=(vh.data||[]).length;
 
-document.querySelectorAll(".section").forEach(s=>s.style.display="none");
-document.getElementById(id).style.display="block";
+  const fins=fin.data||[];
+  const rec=fins.filter(f=>f.sens==='recette').reduce((a,f)=>a+Number(f.montant),0);
+  const dep=fins.filter(f=>f.sens==='depense').reduce((a,f)=>a+Number(f.montant),0);
+  const ben=rec-dep;
+  document.getElementById('d-rec').textContent=fmt(rec);
+  document.getElementById('d-dep').textContent=fmt(dep);
+  const db2=document.getElementById('d-ben');db2.textContent=fmt(Math.abs(ben));db2.style.color=ben>=0?'#1d4ed8':'#dc2626';
 
+  // Bar chart
+  const months=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const counts=new Array(12).fill(0);
+  const {data:ai}=await db.from('installations').select('date_installation');
+  (ai||[]).forEach(i=>{if(i.date_installation)counts[new Date(i.date_installation).getMonth()]++;});
+  const maxC=Math.max(...counts,1);
+  document.getElementById('bar-chart').innerHTML=months.map((m,i)=>`<div class="bwrap"><div class="bar" style="height:${Math.round(counts[i]/maxC*90)+8}px;opacity:${.4+counts[i]/maxC*.6}"></div><div class="blabel">${m}</div></div>`).join('');
+
+  // Donut
+  const en_stock=(b.data||[]).filter(x=>x.statut==='en_stock').length,desac=(b.data||[]).filter(x=>x.statut==='désactivée').length;
+  const colors=['#059669','#16a34a','#d97706'],vals=[inst,en_stock,desac],labels=['Installées','En stock','Désactivées'];
+  const cir=2*Math.PI*35;let off=0;
+  const parts=vals.map((vl,i)=>{const d=total?vl/total*cir:0;const s=`<circle cx="45" cy="45" r="35" fill="none" stroke="${colors[i]}" stroke-width="14" stroke-dasharray="${d.toFixed(2)} ${(cir-d).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 45 45)"/>`;off+=d;return s;});
+  document.getElementById('donut-svg').innerHTML=`<circle cx="45" cy="45" r="35" fill="none" stroke="#e8e8e8" stroke-width="14"/>`+parts.join('')+`<text x="45" y="49" text-anchor="middle" font-size="13" font-weight="600" fill="#111">${total}</text>`;
+  document.getElementById('donut-leg').innerHTML=vals.map((vl,i)=>`<div class="legend-item"><div class="ldot" style="background:${colors[i]}"></div><span>${labels[i]} — ${vl}</span></div>`).join('');
+
+  const ri=document.getElementById('recent-inst');
+  if(!(ins.data||[]).length){ri.innerHTML='<div class="empty">Aucune installation.</div>';return;}
+  ri.innerHTML=`<table><thead><tr><th>IMEI</th><th>Véhicule</th><th>Client</th><th>Technicien</th><th>Date</th></tr></thead><tbody>${ins.data.map(i=>`<tr><td>${i.balises?.imei||'—'}</td><td>${i.vehicules?.immatriculation||'—'} ${i.vehicules?.marque||''}</td><td>${i.clients?i.clients.prenom+' '+i.clients.nom:'—'}</td><td>${i.technicien||'—'}</td><td>${i.date_installation?new Date(i.date_installation).toLocaleDateString('fr-FR'):'—'}</td></tr>`).join('')}</tbody></table>`;
 }
 
-show("dashboard");
-render();
+// ============ BALISES ============
+async function loadBalises(){
+  const imei=document.getElementById('fb-imei').value.trim(),stat=document.getElementById('fb-stat').value;
+  let q=db.from('balises').select('*').order('created_at',{ascending:false});
+  if(imei)q=q.ilike('imei','%'+imei+'%');if(stat)q=q.eq('statut',stat);
+  const {data,error}=await q;
+  const c=document.getElementById('balises-c');
+  if(error||!data?.length){c.innerHTML=`<div class="empty">${error?'Erreur.':'Aucune balise.'}</div>`;return;}
+  const sm={'installée':'bg','en_stock':'ba','désactivée':'br'};
+  const sl={'installée':'Installée','en_stock':'En stock','désactivée':'Désactivée'};
+  c.innerHTML=`<table><thead><tr><th>IMEI</th><th>Modèle</th><th>Statut</th><th>Prix achat</th><th>Prix vente</th><th>Opérateur</th><th>Actions</th></tr></thead><tbody>${data.map(b=>`<tr><td style="font-weight:500">${b.imei}</td><td>${b.modele||'—'}</td><td><span class="badge ${sm[b.statut]||'bx'}">${sl[b.statut]||b.statut}</span></td><td>${b.prix_achat?fmt(b.prix_achat):'—'}</td><td>${b.prix_vente?fmt(b.prix_vente):'—'}</td><td>${b.operateur||'—'}</td><td><div class="row-acts"><div class="ibtn" onclick='editBalise(${JSON.stringify(b)})'><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div class="ibtn del" onclick="delRec('balises','${b.id}',loadBalises)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div></div></td></tr>`).join('')}</tbody></table>`;
+}
+async function saveBalise(){
+  const id=document.getElementById('mb-id').value;
+  const payload={imei:document.getElementById('mb-imei').value.trim(),modele:document.getElementById('mb-mod').value.trim(),date_achat:document.getElementById('mb-date').value||null,statut:document.getElementById('mb-stat').value,sim_installee:document.getElementById('mb-sim').value==='true',operateur:document.getElementById('mb-op').value||null,remarque:document.getElementById('mb-rem').value||null,prix_achat:parseInt(document.getElementById('mb-pa').value)||0,prix_vente:parseInt(document.getElementById('mb-pv').value)||0,prix_puce:parseInt(document.getElementById('mb-pp').value)||0};
+  if(!payload.imei){toast('IMEI obligatoire',true);return;}
+  const {error}=id?await db.from('balises').update(payload).eq('id',id):await db.from('balises').insert(payload);
+  if(error){toast(error.message,true);return;}
+  if(!id){
+    const pa=parseInt(document.getElementById('mb-pa').value)||0,pp=parseInt(document.getElementById('mb-pp').value)||0;
+    if(pa>0)await db.from('finances').insert({type:'achat_balise',description:`Achat ${payload.imei}`,montant:pa,sens:'depense',date_transaction:payload.date_achat||new Date().toISOString().slice(0,10)}).catch(()=>{});
+    if(pp>0)await db.from('finances').insert({type:'puce_sim',description:`Puce SIM ${payload.imei}`,montant:pp,sens:'depense',date_transaction:new Date().toISOString().slice(0,10)}).catch(()=>{});
+  }
+  closeM('m-balise');toast(id?'Balise modifiée !':'Balise ajoutée !');loadBalises();loadDashboard();
+}
+function editBalise(b){
+  document.getElementById('mb-id').value=b.id;document.getElementById('mb-title').textContent='Modifier la balise';
+  document.getElementById('mb-imei').value=b.imei;document.getElementById('mb-mod').value=b.modele||'';
+  document.getElementById('mb-date').value=b.date_achat||'';document.getElementById('mb-stat').value=b.statut;
+  document.getElementById('mb-sim').value=b.sim_installee?'true':'false';document.getElementById('mb-op').value=b.operateur||'';
+  document.getElementById('mb-rem').value=b.remarque||'';
+  document.getElementById('mb-pa').value=b.prix_achat||0;document.getElementById('mb-pv').value=b.prix_vente||0;document.getElementById('mb-pp').value=b.prix_puce||0;
+  openM('m-balise');
+}
 
+// ============ CLIENTS ============
+async function loadClients(){
+  const s=document.getElementById('fc-s').value.trim(),t=document.getElementById('fc-t').value;
+  let q=db.from('clients').select('*').order('created_at',{ascending:false});
+  if(s)q=q.or(`nom.ilike.%${s}%,prenom.ilike.%${s}%,telephone.ilike.%${s}%`);if(t)q=q.eq('type_client',t);
+  const {data,error}=await q;const c=document.getElementById('clients-c');
+  if(error||!data?.length){c.innerHTML=`<div class="empty">${error?'Erreur.':'Aucun client.'}</div>`;return;}
+  c.innerHTML=`<table><thead><tr><th>Nom</th><th>Téléphone</th><th>Email</th><th>Adresse</th><th>Type</th><th>Actions</th></tr></thead><tbody>${data.map(cl=>`<tr><td>${cl.prenom} ${cl.nom}</td><td>${cl.telephone||'—'}</td><td>${cl.email||'—'}</td><td>${cl.adresse||'—'}</td><td><span class="badge ${cl.type_client==='entreprise'?'ba':'bb'}">${cl.type_client==='entreprise'?'Entreprise':'Particulier'}</span></td><td><div class="row-acts"><div class="ibtn" onclick='editClient(${JSON.stringify(cl)})'><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div class="ibtn del" onclick="delRec('clients','${cl.id}',loadClients)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div></div></td></tr>`).join('')}</tbody></table>`;
+}
+async function saveClient(){
+  const id=document.getElementById('mc-id').value;
+  const payload={prenom:document.getElementById('mc-prenom').value.trim(),nom:document.getElementById('mc-nom').value.trim(),telephone:document.getElementById('mc-tel').value.trim()||null,email:document.getElementById('mc-email').value.trim()||null,adresse:document.getElementById('mc-addr').value.trim()||null,type_client:document.getElementById('mc-type').value};
+  if(!payload.prenom||!payload.nom){toast('Prénom et nom requis',true);return;}
+  const {error}=id?await db.from('clients').update(payload).eq('id',id):await db.from('clients').insert(payload);
+  if(error){toast(error.message,true);return;}
+  closeM('m-client');toast(id?'Modifié !':'Client ajouté !');loadClients();loadDashboard();
+}
+function editClient(cl){
+  document.getElementById('mc-id').value=cl.id;document.getElementById('mc-title').textContent='Modifier client';
+  document.getElementById('mc-prenom').value=cl.prenom;document.getElementById('mc-nom').value=cl.nom;
+  document.getElementById('mc-tel').value=cl.telephone||'';document.getElementById('mc-email').value=cl.email||'';
+  document.getElementById('mc-addr').value=cl.adresse||'';document.getElementById('mc-type').value=cl.type_client;
+  openM('m-client');
+}
+
+// ============ VEHICULES ============
+async function loadVehicules(){
+  const s=document.getElementById('fv-s').value.trim();
+  let q=db.from('vehicules').select('*,clients(prenom,nom)').order('created_at',{ascending:false});
+  if(s)q=q.or(`immatriculation.ilike.%${s}%,marque.ilike.%${s}%`);
+  const {data,error}=await q;const c=document.getElementById('vehicules-c');
+  if(error||!data?.length){c.innerHTML=`<div class="empty">${error?'Erreur.':'Aucun véhicule.'}</div>`;return;}
+  c.innerHTML=`<table><thead><tr><th>Immatriculation</th><th>Marque / Modèle</th><th>Couleur</th><th>Propriétaire</th><th>Actions</th></tr></thead><tbody>${data.map(v=>`<tr><td style="font-weight:500">${v.immatriculation}</td><td>${v.marque} ${v.modele}</td><td>${v.couleur||'—'}</td><td>${v.clients?v.clients.prenom+' '+v.clients.nom:'—'}</td><td><div class="row-acts"><div class="ibtn" onclick='editVeh(${JSON.stringify(v)})'><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div class="ibtn del" onclick="delRec('vehicules','${v.id}',loadVehicules)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div></div></td></tr>`).join('')}</tbody></table>`;
+}
+async function saveVeh(){
+  const id=document.getElementById('mv-id').value;
+  const payload={marque:document.getElementById('mv-marque').value.trim(),modele:document.getElementById('mv-modele').value.trim(),immatriculation:document.getElementById('mv-immat').value.trim(),couleur:document.getElementById('mv-couleur').value.trim()||null,client_id:document.getElementById('mv-client').value||null};
+  if(!payload.marque||!payload.immatriculation){toast('Champs requis manquants',true);return;}
+  const {error}=id?await db.from('vehicules').update(payload).eq('id',id):await db.from('vehicules').insert(payload);
+  if(error){toast(error.message,true);return;}
+  closeM('m-veh');toast(id?'Modifié !':'Véhicule ajouté !');loadVehicules();loadDashboard();
+}
+async function editVeh(v){
+  await popClients('mv-client');
+  document.getElementById('mv-id').value=v.id;document.getElementById('mv-title').textContent='Modifier véhicule';
+  document.getElementById('mv-marque').value=v.marque;document.getElementById('mv-modele').value=v.modele;
+  document.getElementById('mv-immat').value=v.immatriculation;document.getElementById('mv-couleur').value=v.couleur||'';
+  document.getElementById('mv-client').value=v.client_id||'';openM('m-veh');
+}
+
+// ============ INSTALLATIONS ============
+async function loadInst(){
+  const {data,error}=await db.from('installations').select('*,balises(imei),vehicules(immatriculation,marque),clients(prenom,nom)').order('created_at',{ascending:false});
+  const c=document.getElementById('inst-c');
+  if(error||!data?.length){c.innerHTML=`<div class="empty">${error?'Erreur.':'Aucune installation.'}</div>`;return;}
+  c.innerHTML=`<table><thead><tr><th>IMEI</th><th>Véhicule</th><th>Client</th><th>Technicien</th><th>Transport</th><th>Frais tech.</th><th>Date</th><th>Actions</th></tr></thead><tbody>${data.map(i=>`<tr><td>${i.balises?.imei||'—'}</td><td>${i.vehicules?.immatriculation||'—'} ${i.vehicules?.marque||''}</td><td>${i.clients?i.clients.prenom+' '+i.clients.nom:'—'}</td><td>${i.technicien||'—'}</td><td class="mdep">${i.frais_transport?fmt(i.frais_transport):'—'}</td><td class="mdep">${i.frais_technicien?fmt(i.frais_technicien):'—'}</td><td>${i.date_installation?new Date(i.date_installation).toLocaleDateString('fr-FR'):'—'}</td><td><div class="row-acts"><div class="ibtn del" onclick="delRec('installations','${i.id}',loadInst)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div></div></td></tr>`).join('')}</tbody></table>`;
+}
+async function saveInst(){
+  const balId=document.getElementById('mi-bal').value||null;
+  const tr=parseInt(document.getElementById('mi-tr').value)||0,tf=parseInt(document.getElementById('mi-tf').value)||0;
+  const payload={balise_id:balId,vehicule_id:document.getElementById('mi-veh').value||null,client_id:document.getElementById('mi-cl').value||null,date_installation:document.getElementById('mi-date').value,technicien:document.getElementById('mi-tech').value.trim()||null,lieu:document.getElementById('mi-lieu').value.trim()||null,photo_url:document.getElementById('mi-photo').value.trim()||null,frais_transport:tr,frais_technicien:tf};
+  if(!payload.date_installation){toast('Date requise',true);return;}
+  const {data:inst,error}=await db.from('installations').insert(payload).select().single();
+  if(error){toast(error.message,true);return;}
+  if(balId)await db.from('balises').update({statut:'installée'}).eq('id',balId);
+  const dt=payload.date_installation;
+  if(tr>0)await db.from('finances').insert({type:'transport',description:'Frais transport',montant:tr,sens:'depense',installation_id:inst?.id,date_transaction:dt}).catch(()=>{});
+  if(tf>0)await db.from('finances').insert({type:'technicien',description:`Paiement technicien`,montant:tf,sens:'depense',installation_id:inst?.id,date_transaction:dt}).catch(()=>{});
+  if(balId){const {data:bal}=await db.from('balises').select('prix_vente,imei').eq('id',balId).single();if(bal?.prix_vente>0)await db.from('finances').insert({type:'vente_balise',description:`Vente ${bal.imei}`,montant:bal.prix_vente,sens:'recette',balise_id:balId,client_id:payload.client_id,date_transaction:dt}).catch(()=>{});}
+  closeM('m-inst');toast('Installation enregistrée !');loadInst();loadDashboard();
+}
+
+// ============ FINANCES ============
+async function loadFinances(){
+  const type=document.getElementById('ff-t').value,sens=document.getElementById('ff-s').value;
+  let q=db.from('finances').select('*,balises(imei),clients(prenom,nom)').order('date_transaction',{ascending:false});
+  if(type)q=q.eq('type',type);if(sens)q=q.eq('sens',sens);
+  const {data,error}=await q;
+
+  const {data:all}=await db.from('finances').select('montant,sens,type').then(r=>r).catch(()=>({data:[],error:null}));
+  const fins=all||[];
+  const rec=fins.filter(f=>f.sens==='recette').reduce((a,f)=>a+Number(f.montant),0);
+  const dep=fins.filter(f=>f.sens==='depense').reduce((a,f)=>a+Number(f.montant),0);
+  const ben=rec-dep;
+  document.getElementById('f-rec').textContent=fmt(rec);
+  document.getElementById('f-dep').textContent=fmt(dep);
+  const fb=document.getElementById('f-ben');fb.textContent=fmt(Math.abs(ben));fb.style.color=ben>=0?'#1d4ed8':'#dc2626';
+
+  const cats={achat_balise:{l:'📦 Achat balises',t:0},vente_balise:{l:'💰 Ventes',t:0},transport:{l:'🚗 Transport',t:0},technicien:{l:'🔧 Techniciens',t:0},puce_sim:{l:'📱 Puces SIM',t:0},autre:{l:'📋 Autres',t:0}};
+  fins.forEach(f=>{if(cats[f.type])cats[f.type].t+=Number(f.montant);});
+  document.getElementById('fin-cats').innerHTML=Object.values(cats).map(c=>`<div class="ccat"><div class="ccat-l">${c.l}</div><div class="ccat-v">${fmt(c.t)}</div></div>`).join('');
+
+  const cont=document.getElementById('fin-c');
+  if(error||!data?.length){cont.innerHTML=`<div class="empty">${error?'Erreur (exécutez finances_schema.sql)':'Aucune transaction.'}</div>`;return;}
+  const tl={achat_balise:'Achat balise',vente_balise:'Vente balise',transport:'Transport',technicien:'Technicien',puce_sim:'Puce SIM',autre:'Autre'};
+  const tc={achat_balise:'ta',vente_balise:'tv',transport:'tt',technicien:'tth',puce_sim:'tp',autre:'to'};
+  cont.innerHTML=`<table><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Balise</th><th>Client</th><th>Montant</th><th>Actions</th></tr></thead><tbody>${data.map(f=>`<tr><td>${new Date(f.date_transaction).toLocaleDateString('fr-FR')}</td><td><span class="tbadge ${tc[f.type]||'to'}">${tl[f.type]||f.type}</span></td><td>${f.description||'—'}</td><td>${f.balises?.imei||'—'}</td><td>${f.clients?f.clients.prenom+' '+f.clients.nom:'—'}</td><td class="${f.sens==='recette'?'mrec':'mdep'}">${f.sens==='recette'?'+':'-'} ${fmt(f.montant)}</td><td><div class="row-acts"><div class="ibtn del" onclick="delRec('finances','${f.id}',loadFinances)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div></div></td></tr>`).join('')}</tbody></table>`;
+}
+function autoSens(){const t=document.getElementById('mf-type').value;document.getElementById('mf-sens').value=t==='vente_balise'?'recette':'depense';}
+async function saveFin(){
+  const id=document.getElementById('mf-id').value;
+  const payload={type:document.getElementById('mf-type').value,sens:document.getElementById('mf-sens').value,montant:parseInt(document.getElementById('mf-montant').value)||0,date_transaction:document.getElementById('mf-date').value,description:document.getElementById('mf-desc').value.trim()||null,reference:document.getElementById('mf-ref').value.trim()||null,balise_id:document.getElementById('mf-bal').value||null,client_id:document.getElementById('mf-cl').value||null};
+  if(!payload.montant||!payload.date_transaction){toast('Montant et date requis',true);return;}
+  const {error}=id?await db.from('finances').update(payload).eq('id',id):await db.from('finances').insert(payload);
+  if(error){toast(error.message,true);return;}
+  closeM('m-fin');toast('Transaction enregistrée !');loadFinances();loadDashboard();
+}
+
+// ============ USERS ============
+async function loadUsers(){
+  const {data}=await db.from('profils').select('*').order('created_at',{ascending:false});
+  const c=document.getElementById('users-c');if(!data){c.innerHTML='<div class="empty">Erreur.</div>';return;}
+  const rm={admin:'bb',technicien:'ba',agent:'bx',partenaire:'bx'};
+  c.innerHTML=`<table><thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Statut</th></tr></thead><tbody>${data.map(u=>`<tr><td>${u.nom||'—'}</td><td>${u.email||'—'}</td><td><span class="badge ${rm[u.role]||'bx'}">${u.role}</span></td><td><span class="badge ${u.actif?'bg':'br'}">${u.actif?'Actif':'Inactif'}</span></td></tr>`).join('')}</tbody></table>`;
+}
+async function saveUser(){
+  const nom=document.getElementById('mu-nom').value.trim(),email=document.getElementById('mu-email').value.trim(),pwd=document.getElementById('mu-pwd').value,role=document.getElementById('mu-role').value;
+  if(!email||!pwd){toast('Email et mot de passe requis',true);return;}
+  const {error}=await db.auth.signUp({email,password:pwd,options:{data:{nom,role}}});
+  if(error){toast(error.message,true);return;}
+  closeM('m-user');toast('Compte créé !');loadUsers();
+}
+
+// ============ DELETE ============
+async function delRec(table,id,cb){
+  if(!confirm('Supprimer ?'))return;
+  const {error}=await db.from(table).delete().eq('id',id);
+  if(error){toast(error.message,true);return;}
+  toast('Supprimé !');cb();loadDashboard();
+}
+
+// ============ SELECTS ============
+async function popClients(sid){const {data}=await db.from('clients').select('id,prenom,nom').order('nom');document.getElementById(sid).innerHTML='<option value="">-- Sélectionner --</option>'+(data||[]).map(c=>`<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('');}
+async function popBalises(sid,all=false){let q=db.from('balises').select('id,imei,modele');if(!all)q=q.eq('statut','en_stock');const {data}=await q;document.getElementById(sid).innerHTML='<option value="">-- Sélectionner --</option>'+(data||[]).map(b=>`<option value="${b.id}">${b.imei} — ${b.modele||''}</option>`).join('');}
+async function popVehicules(sid){const {data}=await db.from('vehicules').select('id,immatriculation,marque');document.getElementById(sid).innerHTML='<option value="">-- Sélectionner --</option>'+(data||[]).map(v=>`<option value="${v.id}">${v.immatriculation} ${v.marque}</option>`).join('');}
+
+// Open modal with data
+const _origOpenM=openM;
+window.openM=async function(id){
+  if(id==='m-veh'){await popClients('mv-client');document.getElementById('mv-id').value='';['mv-marque','mv-modele','mv-immat','mv-couleur'].forEach(i=>document.getElementById(i).value='');}
+  if(id==='m-inst'){await Promise.all([popBalises('mi-bal'),popVehicules('mi-veh'),popClients('mi-cl')]);document.getElementById('mi-date').valueAsDate=new Date();['mi-tr','mi-tf'].forEach(i=>document.getElementById(i).value=0);}
+  if(id==='m-balise'){document.getElementById('mb-id').value='';document.getElementById('mb-title').textContent='Ajouter une balise';['mb-imei','mb-mod','mb-date','mb-rem'].forEach(i=>document.getElementById(i).value='');['mb-pa','mb-pv','mb-pp'].forEach(i=>document.getElementById(i).value=0);document.getElementById('mb-stat').value='en_stock';document.getElementById('mb-sim').value='false';document.getElementById('mb-op').value='';}
+  if(id==='m-client'){document.getElementById('mc-id').value='';document.getElementById('mc-title').textContent='Ajouter un client';['mc-prenom','mc-nom','mc-tel','mc-email','mc-addr'].forEach(i=>document.getElementById(i).value='');document.getElementById('mc-type').value='particulier';}
+  if(id==='m-fin'){document.getElementById('mf-id').value='';document.getElementById('mf-date').valueAsDate=new Date();['mf-montant','mf-desc','mf-ref'].forEach(i=>document.getElementById(i).value='');autoSens();await Promise.all([popBalises('mf-bal',true),popClients('mf-cl')]);}
+  document.getElementById(id).classList.add('on');
+};
+
+// ============ EXPORT ============
+async function doExport(){
+  const active=document.querySelector('.page.on').id.replace('page-','');
+  const tables={balises:'balises',clients:'clients',vehicules:'vehicules',installations:'installations',finances:'finances'};
+  const tbl=tables[active];if(!tbl){toast('Export non disponible');return;}
+  const {data}=await db.from(tbl).select('*');if(!data?.length){toast('Aucune donnée');return;}
+  const keys=Object.keys(data[0]);
+  const csv=[keys.join(','),...data.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download=`AHSG_${tbl}_${new Date().toISOString().slice(0,10)}.csv`;a.click();toast('Export CSV téléchargé !');
+}
 </script>
-
 </body>
 </html>
